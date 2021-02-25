@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> wikiList;
     ArrayList<String> artistWikiList;
     RecyclerView songView;
+    Boolean viewState = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,8 +115,21 @@ public class MainActivity extends AppCompatActivity {
         MyAdapter adapter = new MyAdapter(songList, artistList, albumIds, urlList, wikiList, artistWikiList, listener);
         songView.setHasFixedSize(true);
         songView.setAdapter(adapter);
+
+        //keeps view consistent when changing orientation
+        if(savedInstanceState != null){
+            viewState = savedInstanceState.getBoolean("list_state");
+        }
+
         //sets the recycleView as standard vertical linear view
-        songView.setLayoutManager(new LinearLayoutManager(this));
+        if(viewState){
+            songView.setLayoutManager(new LinearLayoutManager(this));
+        }
+        else{
+            songView.setLayoutManager(new GridLayoutManager(this,2));
+        }
+
+
 
     }
 
@@ -132,13 +147,22 @@ public class MainActivity extends AppCompatActivity {
         switch(item.getItemId()){
             case R.id.menu1:
                 songView.setLayoutManager(new LinearLayoutManager(this));
+                viewState = true;
                 return true;
             case R.id.menu2:
                 songView.setLayoutManager(new GridLayoutManager(this,2));
+                viewState = false;
                 return true;
             default:
                 return false;
         }
+    }
+
+    //saves the layout view when changing orientation
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("list_state", viewState);
     }
 
 }
